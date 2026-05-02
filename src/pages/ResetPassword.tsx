@@ -15,17 +15,28 @@ export const ResetPassword: React.FC = () => {
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    // Supabaseはメールリンクのトークンをhashで渡す
-    // onAuthStateChangeでrecoveryセッションを検出する
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'PASSWORD_RECOVERY') {
-        setValidSession(true);
+    let resolved = false;
+
+    const resolve = (valid: boolean) => {
+      if (!resolved) {
+        resolved = true;
+        if (valid) setValidSession(true);
+        setChecking(false);
       }
-      setChecking(false);
+    };
+
+    // すでにリカバリーセッションが存在する場合（PKCE code exchange済み）
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) resolve(true);
     });
 
-    // 少し待ってもイベントが来なければ無効なリンクと判断
-    const timer = setTimeout(() => setChecking(false), 3000);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') {
+        resolve(true);
+      }
+    });
+
+    const timer = setTimeout(() => resolve(false), 5000);
 
     return () => {
       subscription.unsubscribe();
