@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+@theme {
+  --color-base-bg: #FFFFFF;
+  --color-base-text: #111111;
+  --color-base-subtext: #666666;
+  --color-base-border: #E5E5E5;
+  --color-base-card: #FAFAFA;
+
+  --color-status-todo: #E0E0E0;
+  --color-status-doing: #A5D8FF;
+  --color-status-review: #FFF3BF;
+  --color-status-done: #C3F0CA;
+
+  --color-priority-low: #E5E5E5;
+  --color-priority-medium: #D0EBFF;
+  --color-priority-high: #FFD8A8;
+  --color-priority-urgent: #FFB3B3;
+  
+  --font-sans: 'Noto Sans JP', sans-serif;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-base-bg);
+    color: var(--color-base-text);
+    font-family: var(--font-sans);
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Remove default Vite styles */
+  #root {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+}
