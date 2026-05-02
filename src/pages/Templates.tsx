@@ -691,7 +691,7 @@ export const Templates: React.FC = () => {
                 <CardContent className="flex-1 flex flex-col gap-3">
                   {tasks.length > 0 ? (
                     <ul className="space-y-1.5 flex-1">
-                      {tasks.slice(0, 6).map((task, i) => {
+                      {tasks.slice(0, 6).map((task) => {
                         const p = PRIORITY_OPTIONS.find(o => o.value === task.priority) ?? PRIORITY_OPTIONS[1];
                         return (
                           <li key={task.id} className="flex items-center gap-2 text-sm">
