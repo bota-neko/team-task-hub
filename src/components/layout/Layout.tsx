@@ -16,6 +16,7 @@ export const Layout: React.FC = () => {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [editName, setEditName] = useState('');
   const [profileError, setProfileError] = useState('');
+  const [resetSent, setResetSent] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   if (!user) {
@@ -131,6 +132,7 @@ export const Layout: React.FC = () => {
             onClick={() => {
               setEditName(profile?.name || '');
               setProfileError('');
+              setResetSent(false);
               setIsProfileModalOpen(true);
             }}
             className="flex items-center gap-2 text-sm text-base-subtext hover:text-blue-500 transition-colors bg-base-card px-3 py-1.5 rounded-full border border-base-border"
@@ -167,6 +169,26 @@ export const Layout: React.FC = () => {
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="ghost" onClick={() => setIsProfileModalOpen(false)}>キャンセル</Button>
             <Button type="submit">保存</Button>
+          </div>
+          <div className="border-t border-base-border pt-4">
+            <p className="text-xs text-base-subtext mb-2">パスワードを変更する場合は確認メールを送信します。</p>
+            {resetSent ? (
+              <p className="text-xs text-green-600">確認メールを送信しました。メール内のリンクをクリックしてください。</p>
+            ) : (
+              <button
+                type="button"
+                onClick={async () => {
+                  const email = profile?.email || user.email || '';
+                  await supabase.auth.resetPasswordForEmail(email, {
+                    redirectTo: `${window.location.origin}/reset-password`,
+                  });
+                  setResetSent(true);
+                }}
+                className="text-xs text-blue-500 hover:text-blue-600 underline"
+              >
+                パスワード変更メールを送信
+              </button>
+            )}
           </div>
         </form>
       </Modal>

@@ -14,6 +14,7 @@ import { Templates } from './pages/Templates';
 import { TaskList } from './pages/TaskList';
 import { TeamSettings } from './pages/TeamSettings';
 import { InviteAccept } from './pages/InviteAccept';
+import { ResetPassword } from './pages/ResetPassword';
 
 function AppInner() {
   useProfile();
@@ -54,6 +55,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/invite/:token" element={<InviteAccept />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/" element={<Layout />}>
           <Route index element={<Dashboard />} />
           <Route path="projects" element={<Projects />} />
