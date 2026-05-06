@@ -7,10 +7,9 @@ import { Button } from '../components/ui/Button';
 import { User as UserIcon } from 'lucide-react';
 import { Input } from '../components/ui/Input';
 import { Modal } from '../components/ui/Modal';
-import { DndContext, DragOverlay, closestCorners, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { DndContext, DragOverlay, closestCorners, KeyboardSensor, PointerSensor, useSensor, useSensors, useDroppable } from '@dnd-kit/core';
 import type { DragStartEvent, DragEndEvent } from '@dnd-kit/core';
-import { SortableContext, arrayMove, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { useSortable } from '@dnd-kit/sortable';
+import { SortableContext, arrayMove, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useTeamStore } from '../store/team';
 import { useAuthStore } from '../store/auth';
@@ -607,15 +606,18 @@ function Column({ id, title, color, tasks, onEdit, teamMembers, onStatusChange }
   teamMembers: TeamMember[];
   onStatusChange: (task: Task, newStatus: Task['status']) => void;
 }) {
-  const { setNodeRef } = useSortable({ id, data: { type: 'Column' } });
+  const { setNodeRef, isOver } = useDroppable({ id });
 
   return (
-    <div ref={setNodeRef} className="flex-shrink-0 w-72 md:w-80 bg-base-card rounded-lg border border-base-border flex flex-col">
+    <div className="flex-shrink-0 w-72 md:w-80 bg-base-card rounded-lg border border-base-border flex flex-col">
       <div className={`p-3 font-semibold rounded-t-lg border-b border-base-border flex justify-between ${color}`}>
         <span>{title}</span>
         <span className="bg-white/50 text-xs px-2 py-1 rounded-full">{tasks.length}</span>
       </div>
-      <div className="flex-1 p-3 overflow-y-auto space-y-3 min-h-[200px]">
+      <div
+        ref={setNodeRef}
+        className={`flex-1 p-3 overflow-y-auto space-y-3 min-h-[200px] transition-colors ${isOver ? 'bg-blue-50/30' : ''}`}
+      >
         <SortableContext items={tasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
           {tasks.map(task => (
             <SortableTask key={task.id} task={task} onEdit={onEdit} teamMembers={teamMembers} onStatusChange={onStatusChange} />
