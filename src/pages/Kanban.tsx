@@ -351,11 +351,14 @@ export const Kanban: React.FC = () => {
       <DndContext
         sensors={sensors}
         collisionDetection={(args) => {
-          // ポインターが入っているカラムを優先検出
+          const activeTask = tasks.find(t => t.id === args.active.id);
           const pointerCollisions = pointerWithin(args);
           const columnCollision = pointerCollisions.find(c => COLUMNS.some(col => col.id === c.id));
-          if (columnCollision) return [columnCollision];
-          if (pointerCollisions.length > 0) return pointerCollisions;
+          // 別カラムへのドロップ → カラムを優先検出
+          if (columnCollision && columnCollision.id !== activeTask?.status) {
+            return [columnCollision];
+          }
+          // 同じカラム内の並び替え → タスクを検出
           return closestCorners(args);
         }}
         onDragStart={handleDragStart}
