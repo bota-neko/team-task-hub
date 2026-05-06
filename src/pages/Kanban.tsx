@@ -7,7 +7,7 @@ import { Button } from '../components/ui/Button';
 import { User as UserIcon } from 'lucide-react';
 import { Input } from '../components/ui/Input';
 import { Modal } from '../components/ui/Modal';
-import { DndContext, DragOverlay, closestCorners, KeyboardSensor, PointerSensor, useSensor, useSensors, useDroppable } from '@dnd-kit/core';
+import { DndContext, DragOverlay, closestCorners, pointerWithin, KeyboardSensor, PointerSensor, useSensor, useSensors, useDroppable } from '@dnd-kit/core';
 import type { DragStartEvent, DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -348,7 +348,19 @@ export const Kanban: React.FC = () => {
         <Button onClick={() => setIsModalOpen(true)} className="shrink-0">タスクを追加</Button>
       </div>
 
-      <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={(args) => {
+          // ポインターが入っているカラムを優先検出
+          const pointerCollisions = pointerWithin(args);
+          const columnCollision = pointerCollisions.find(c => COLUMNS.some(col => col.id === c.id));
+          if (columnCollision) return [columnCollision];
+          if (pointerCollisions.length > 0) return pointerCollisions;
+          return closestCorners(args);
+        }}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+      >
         <div className="flex flex-1 gap-3 md:gap-6 overflow-x-auto pb-4 -mx-4 md:mx-0 px-4 md:px-0">
           {COLUMNS.map(col => {
             const columnTasks = tasks.filter(t => t.status === col.id);
