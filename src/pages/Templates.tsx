@@ -19,6 +19,7 @@ const PRIORITY_OPTIONS = [
   { value: 'medium', label: '通常', cls: 'bg-blue-50 text-blue-600' },
   { value: 'high', label: '重要', cls: 'bg-orange-100 text-orange-700' },
   { value: 'urgent', label: '緊急', cls: 'bg-red-100 text-red-700' },
+  { value: 'routine', label: 'ルーティン', cls: 'bg-green-100 text-green-700' },
 ];
 
 const DEFAULT_PERSONAL_TEMPLATES = [

@@ -497,6 +497,7 @@ export const Kanban: React.FC = () => {
                 <option value="medium">通常</option>
                 <option value="high">重要</option>
                 <option value="urgent">緊急</option>
+                <option value="routine">ルーティン</option>
               </select>
             </div>
             {!isPersonal && (

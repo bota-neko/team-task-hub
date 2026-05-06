@@ -115,7 +115,7 @@ export interface Database {
           title: string
           description: string | null
           status: 'todo' | 'doing' | 'review' | 'done'
-          priority: 'low' | 'medium' | 'high' | 'urgent'
+          priority: 'low' | 'medium' | 'high' | 'urgent' | 'routine'
           assigned_to: string | null
           start_date: string | null
           due_date: string | null

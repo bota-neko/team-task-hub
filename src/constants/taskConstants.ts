@@ -1,7 +1,7 @@
 import type { Database } from '../types/supabase';
 
 type TaskStatus = Database['public']['Tables']['tasks']['Row']['status'];
-type TaskPriority = Database['public']['Tables']['tasks']['Row']['priority'];
+type TaskPriority = NonNullable<Database['public']['Tables']['tasks']['Row']['priority']>;
 
 export const STATUS_LABELS: Record<TaskStatus, string> = {
   todo: 'することリスト',
@@ -15,6 +15,7 @@ export const PRIORITY_LABELS: Record<TaskPriority, string> = {
   medium: '通常',
   high: '重要',
   urgent: '緊急',
+  routine: 'ルーティン',
 };
 
 export const PRIORITY_COLORS: Record<TaskPriority, string> = {
@@ -22,6 +23,7 @@ export const PRIORITY_COLORS: Record<TaskPriority, string> = {
   medium: 'bg-priority-medium',
   high: 'bg-priority-high',
   urgent: 'bg-priority-urgent',
+  routine: 'bg-priority-routine',
 };
 
 export const PROJECT_STATUS_LABELS: Record<string, string> = {
