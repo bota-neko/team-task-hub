@@ -30,7 +30,7 @@ export const Layout: React.FC = () => {
     { to: '/tasks', label: 'タスク一覧', icon: KanbanSquare, end: false },
     { to: '/projects', label: 'プロジェクト', icon: Folder, end: false },
     { to: '/templates', label: 'テンプレート', icon: Settings, end: false },
-    ...(isTeam ? [{ to: '/team-settings', label: 'チーム設定', icon: Users, end: false }] : []),
+    { to: '/team-settings', label: isTeam ? 'チーム設定' : 'ワークスペース設定', icon: Users, end: false },
   ];
 
   const handleLogout = async () => {

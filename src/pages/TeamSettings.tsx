@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuthStore } from '../store/auth';
 import { useTeamStore } from '../store/team';
@@ -33,7 +34,8 @@ const ROLE_COLORS: Record<Role, string> = {
 
 export const TeamSettings: React.FC = () => {
   const { user } = useAuthStore();
-  const { currentTeam } = useTeamStore();
+  const { currentTeam, teams, setTeams, setCurrentTeam } = useTeamStore();
+  const navigate = useNavigate();
   const [members, setMembers] = useState<MemberRow[]>([]);
   const [pendingInvitations, setPendingInvitations] = useState<Invitation[]>([]);
   const [inviteEmail, setInviteEmail] = useState('');
@@ -44,6 +46,44 @@ export const TeamSettings: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
+
+  // ワークスペース名編集
+  const [editingName, setEditingName] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [nameError, setNameError] = useState('');
+
+  // ワークスペース削除
+  const [deleteWorkspaceConfirm, setDeleteWorkspaceConfirm] = useState(false);
+  const [deleteWorkspaceError, setDeleteWorkspaceError] = useState('');
+
+  const handleRenameWorkspace = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentTeam || !editName.trim()) return;
+    setNameError('');
+    const { error } = await supabase.from('teams').update({ name: editName.trim() }).eq('id', currentTeam.id);
+    if (error) {
+      setNameError('名前の変更に失敗しました');
+    } else {
+      const updated = { ...currentTeam, name: editName.trim() };
+      setCurrentTeam(updated);
+      setTeams(teams.map(t => t.id === currentTeam.id ? updated : t));
+      setEditingName(false);
+    }
+  };
+
+  const handleDeleteWorkspace = async () => {
+    if (!currentTeam) return;
+    setDeleteWorkspaceError('');
+    const { error } = await supabase.from('teams').delete().eq('id', currentTeam.id);
+    if (error) {
+      setDeleteWorkspaceError('削除に失敗しました: ' + error.message);
+      return;
+    }
+    const remaining = teams.filter(t => t.id !== currentTeam.id);
+    setTeams(remaining);
+    setCurrentTeam(remaining[0] ?? null);
+    navigate('/');
+  };
 
   useEffect(() => {
     if (currentTeam) {
@@ -216,15 +256,75 @@ export const TeamSettings: React.FC = () => {
     return <div className="text-base-subtext">チームを選択してください。</div>;
   }
 
+  const WorkspaceManagementCard = () => (
+    <Card>
+      <CardHeader>
+        <CardTitle>ワークスペース管理</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* 名前変更 */}
+        {editingName ? (
+          <form onSubmit={handleRenameWorkspace} className="space-y-2">
+            <label className="block text-sm font-medium text-base-subtext">新しい名前</label>
+            <div className="flex gap-2">
+              <Input
+                value={editName}
+                onChange={e => setEditName(e.target.value)}
+                placeholder={currentTeam.name}
+                required
+                className="flex-1"
+              />
+              <Button type="submit" size="sm">保存</Button>
+              <Button type="button" size="sm" variant="ghost" onClick={() => setEditingName(false)}>取消</Button>
+            </div>
+            {nameError && <p className="text-xs text-red-600">{nameError}</p>}
+          </form>
+        ) : (
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-base-subtext mb-0.5">ワークスペース名</p>
+              <p className="text-sm font-medium text-base-text">{currentTeam.name}</p>
+            </div>
+            <Button size="sm" variant="ghost" onClick={() => { setEditName(currentTeam.name); setEditingName(true); setNameError(''); }}>
+              名前を変更
+            </Button>
+          </div>
+        )}
+
+        {/* 削除 */}
+        <div className="border-t border-base-border pt-4">
+          {deleteWorkspaceError && (
+            <p className="text-xs text-red-600 mb-2">{deleteWorkspaceError}</p>
+          )}
+          {deleteWorkspaceConfirm ? (
+            <div className="space-y-2">
+              <p className="text-sm text-red-600 font-medium">⚠️ 本当に削除しますか？</p>
+              <p className="text-xs text-base-subtext">このワークスペースのプロジェクト・タスクがすべて削除されます。元に戻せません。</p>
+              <div className="flex gap-2">
+                <Button size="sm" variant="danger" onClick={handleDeleteWorkspace}>削除する</Button>
+                <Button size="sm" variant="ghost" onClick={() => setDeleteWorkspaceConfirm(false)}>取消</Button>
+              </div>
+            </div>
+          ) : (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-red-500 hover:text-red-600 hover:bg-red-50"
+              onClick={() => setDeleteWorkspaceConfirm(true)}
+            >
+              ワークスペースを削除
+            </Button>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+
   if (currentTeam.type === 'personal') {
     return (
-      <div className="space-y-4">
-        <h2 className="text-2xl font-bold text-base-text">チーム設定</h2>
-        <Card>
-          <CardContent>
-            <p className="text-base-subtext py-4">チーム設定は「チーム利用」のワークスペースでのみ使用できます。</p>
-          </CardContent>
-        </Card>
+      <div className="space-y-6 max-w-2xl">
+        <h2 className="text-2xl font-bold text-base-text">ワークスペース設定</h2>
+        <WorkspaceManagementCard />
       </div>
     );
   }
@@ -354,6 +454,9 @@ export const TeamSettings: React.FC = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* ワークスペース管理 */}
+      <WorkspaceManagementCard />
 
       {/* メンバー招待 */}
       <Card>
