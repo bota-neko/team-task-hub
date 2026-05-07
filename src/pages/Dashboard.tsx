@@ -234,12 +234,13 @@ export const Dashboard: React.FC = () => {
                     const isUrgentDue = task.due_date && (new Date(task.due_date).getTime() - Date.now()) < 3 * 24 * 60 * 60 * 1000 && new Date(task.due_date).getTime() > Date.now();
                     const isOverdue = task.due_date && new Date(task.due_date).getTime() < Date.now();
                     const priorityBadge: Record<string, { label: string; cls: string }> = {
-                      urgent: { label: '緊急', cls: 'bg-red-100 text-red-700' },
-                      high:   { label: '重要', cls: 'bg-orange-100 text-orange-700' },
-                      medium: { label: '通常', cls: 'bg-blue-50 text-blue-600' },
-                      low:    { label: '低',   cls: 'bg-gray-100 text-gray-500' },
+                      urgent:  { label: '緊急',     cls: 'bg-red-100 text-red-700' },
+                      high:    { label: '重要',     cls: 'bg-orange-100 text-orange-700' },
+                      medium:  { label: '通常',     cls: 'bg-blue-50 text-blue-600' },
+                      low:     { label: '低',       cls: 'bg-gray-100 text-gray-500' },
+                      routine: { label: 'ルーティン', cls: 'bg-green-100 text-green-700' },
                     };
-                    const badge = priorityBadge[task.priority ?? 'medium'];
+                    const badge = priorityBadge[task.priority ?? 'medium'] ?? priorityBadge['medium'];
                     return (
                       <li
                         key={task.id}
